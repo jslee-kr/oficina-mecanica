@@ -1,0 +1,39 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: oficina-postgres
+    environment:
+      POSTGRES_DB: oficina
+      POSTGRES_USER: oficina
+      POSTGRES_PASSWORD: oficina123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - oficina-network
+
+  app:
+    build: .
+    container_name: oficina-app
+    depends_on:
+      - postgres
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/oficina
+      SPRING_DATASOURCE_USERNAME: oficina
+      SPRING_DATASOURCE_PASSWORD: oficina123
+    ports:
+      - "8080:8080"
+    networks:
+      - oficina-network
+
+volumes:
+  postgres_data:
+
+networks:
+  oficina-network:
+    driver: bridge
